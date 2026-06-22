@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#fde8ec" />
+  <title>南崽形象美学｜医美+妆造一体化 AI 诊断</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- 顶部应用栏 -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo">南</div>
+      <div class="brand-text">
+        <div class="brand-title">南崽形象美学</div>
+        <div class="brand-sub">医美 × 妆造 × 合伙人</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容容器 -->
+  <main class="app-main">
+    <nav class="tab-nav">
+      <button class="tab-item active" data-tab="c端">C端形象诊断</button>
+      <button class="tab-item" data-tab="合伙人">合伙人后台</button>
+      <button class="tab-item" data-tab="素材">招商素材</button>
+      <button class="tab-item" data-tab="配置">⚙️API配置</button>
+    </nav>
+
+    <!-- ======== 板块1：C端形象诊断 ======== -->
+    <section class="panel active" id="panel-c端">
+      <div class="hero-card">
+        <div class="hero-title">3D 骨相 · 妆造 · 商K城市适配</div>
+        <div class="hero-sub">上传一张素颜正面照，免费获取全维度形象报告</div>
+        <div class="hero-tags">
+          <span>Face++ 建模</span>
+          <span>GLM-4 Flash 报告</span>
+          <span>豆包Lite 客服</span>
+        </div>
+      </div>
+
+      <div class="card upload-card">
+        <div class="card-title">① 上传素颜正面照</div>
+        <label class="upload-box" for="faceInput">
+          <div class="upload-placeholder" id="uploadPlaceholder">
+            <div class="upload-icon">📸</div>
+            <div>点击或轻触上传</div>
+            <small>建议：正面无遮挡、光线均匀</small>
+          </div>
+          <canvas id="faceCanvas" class="face-canvas" hidden></canvas>
+        </label>
+        <input type="file" id="faceInput" accept="image/*" hidden />
+        <div class="row-btns">
+          <button class="btn btn-outline" id="btnDemoFace">使用示例人脸</button>
+          <button class="btn btn-primary" id="btnStartDetect" disabled>开始 AI 诊断</button>
+        </div>
+      </div>
+
+      <div class="card cloud-card" id="cloudCard" hidden>
+        <div class="card-title">② 云端 AI 算力运行中</div>
+        <div class="cloud-box">
+          <div class="cloud-icon">☁️</div>
+          <div class="cloud-text" id="cloudText">已接入旷视 Face++ · 正在上传图像…</div>
+          <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+          <div class="cloud-steps" id="cloudSteps"></div>
+        </div>
+      </div>
+
+      <div class="card data-card" id="dataCard" hidden>
+        <div class="card-title">③ Face++ 结构化面部数据</div>
+        <div class="data-grid" id="dataGrid"></div>
+        <div class="data-note" id="dataSource"></div>
+      </div>
+
+      <div class="card report-card" id="reportCard" hidden>
+        <div class="card-title">④ 智谱 GLM-4 Flash · 人脸形象诊断报告</div>
+        <div class="report-block" id="reportBlock"></div>
+        <div class="row-btns">
+          <button class="btn btn-outline" id="btnCopyReport">复制报告文本</button>
+          <button class="btn btn-primary" id="btnBookMakeup">预约线下妆造</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== 板块2：合伙人后台 ======== -->
+    <section class="panel" id="panel-合伙人">
+      <div class="partner-hero">
+        <div class="partner-avatar">👩</div>
+        <div class="partner-info">
+          <div class="partner-name" id="partnerName">南崽合伙人</div>
+          <div class="partner-level" id="partnerLevel">白银合伙人</div>
+          <div class="partner-desc">多一份副业给自己兜底，不必只依赖夜场收入</div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-num" id="statIncome">¥ 0</div><div class="stat-label">累计佣金</div></div>
+        <div class="stat-item"><div class="stat-num" id="statOrders">0</div><div class="stat-label">成交客户</div></div>
+        <div class="stat-item"><div class="stat-num" id="statTeam">0</div><div class="stat-label">团队下级</div></div>
+        <div class="stat-item"><div class="stat-num" id="statLevel">Lv.1</div><div class="stat-label">合伙人等级</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">合伙人资料与分级</div>
+        <div class="form-row">
+          <label>昵称</label>
+          <input type="text" id="inputName" placeholder="如：小南" />
+        </div>
+        <div class="form-row">
+          <label>合伙人等级</label>
+          <select id="selectLevel">
+            <option value="白银">白银合伙人（10% 佣金）</option>
+            <option value="黄金">黄金合伙人（15% 佣金）</option>
+            <option value="铂金">铂金合伙人（20% 佣金）</option>
+            <option value="钻石">钻石合伙人（25% 佣金+团队分红）</option>
+          </select>
+        </div>
+        <div class="row-btns">
+          <button class="btn btn-primary" id="btnSavePartner">保存资料</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">佣金结算</div>
+        <div class="form-row">
+          <label>客户成交项目</label>
+          <select id="selectProject">
+            <option value="3800">3D 骨相形象诊断 · ¥3800</option>
+            <option value="6800">轻奢妆造定制套餐 · ¥6800</option>
+            <option value="12800">轻医美合伙人轻代理 · ¥12800</option>
+            <option value="28800">商K城市就业+形象全案 · ¥28800</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>客户姓名</label>
+          <input type="text" id="inputClient" placeholder="如：小雨" />
+        </div>
+        <div class="commission-preview" id="commissionPreview">预估佣金：¥ 0</div>
+        <div class="row-btns">
+          <button class="btn btn-primary" id="btnAddOrder">登记成交</button>
+          <button class="btn btn-outline" id="btnClearOrders">清空记录</button>
+        </div>
+        <table class="order-table" id="orderTable" hidden>
+          <thead><tr><th>客户</th><th>项目</th><th>佣金</th><th>时间</th></tr></thead>
+          <tbody id="orderBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-title">妆造 / 面诊预约</div>
+        <div class="form-row">
+          <label>预约类型</label>
+          <select id="bookingType">
+            <option>线下妆造</option><option>远程面诊</option><option>商K城市规划</option>
+          </select>
+        </div>
+        <div class="form-row"><label>预约时间</label><input type="datetime-local" id="bookingTime" /></div>
+        <div class="form-row"><label>联系方式</label><input type="text" id="bookingContact" placeholder="微信号 / 手机号" /></div>
+        <div class="form-row"><label>备注</label><textarea id="bookingNote" rows="2" placeholder="想改善的方向"></textarea></div>
+        <div class="row-btns">
+          <button class="btn btn-primary" id="btnBookSubmit">提交预约</button>
+        </div>
+        <div class="booking-list" id="bookingList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">智谱 GLM-4 Flash · 合伙人招商文案</div>
+        <div class="row-btns">
+          <button class="btn btn-primary" id="btnGenBiz">一键生成长篇招商文案</button>
+        </div>
+        <div class="biz-text" id="bizText" hidden></div>
+      </div>
+    </section>
+
+    <!-- ======== 板块3：招商素材 ======== -->
+    <section class="panel" id="panel-素材">
+      <div class="hero-card hero-card-alt">
+        <div class="hero-title">纯欲轻奢 · 私域宣传素材</div>
+        <div class="hero-sub">由豆包 Lite & 智谱联合生成，一键复制发抖音 / 朋友圈</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">宣传素材一键生成</div>
+        <div class="row-btns">
+          <button class="btn btn-primary" id="btnGenMaterial">生成短视频 + 海报文案</button>
+        </div>
+        <div class="material-box" id="materialBox" hidden></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">9:16 海报预览（纯欲粉白风格）</div>
+        <div class="poster-grid">
+          <div class="poster" id="poster1">
+            <div class="poster-title" id="poster1Title">多一条出路，多一份兜底</div>
+            <div class="poster-sub">南崽形象美学 · 医美轻创业</div>
+            <div class="poster-tags">#医美合伙人 #妆造定制 #商K副业</div>
+          </div>
+          <div class="poster" id="poster2">
+            <div class="poster-title" id="poster2Title">免费 3D 骨相诊断</div>
+            <div class="poster-sub">脸型 · 肤色 · 穿搭 · 城市 一站式分析</div>
+            <div class="poster-tags">#形象美学 #夜场女生 #轻创业</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== 板块4：API 配置（新增） ======== -->
+    <section class="panel" id="panel-配置">
+      <div class="hero-card">
+        <div class="hero-title">API 配置 · 接入真实 AI</div>
+        <div class="hero-sub">填入你的 API Key，所有调用直接从浏览器发出，密钥仅存本地浏览器</div>
+        <div class="hero-tags">
+          <span>🔒 数据仅存本机</span>
+          <span>📡 HTTPS 直连</span>
+          <span>💸 三大免费额度</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">① 智谱 GLM-4 Flash（免费大模型 · 无需付费）</div>
+        <div class="form-row">
+          <label>智谱 API Key（获取：<a href="https://open.bigmodel.cn/console" target="_blank">open.bigmodel.cn</a>）</label>
+          <input type="password" id="cfgGlmKey" placeholder="开头为 468c 或类似的长字符串" />
+        </div>
+        <div class="form-row">
+          <label>模型名称（默认）</label>
+          <input type="text" id="cfgGlmModel" value="glm-4-flash" />
+        </div>
+        <div class="cfg-status" id="cfgGlmStatus">未验证</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">② 豆包 Lite（字节跳动 · 免费额度/无限畅聊包）</div>
+        <div class="form-row">
+          <label>豆包 API Key（获取：<a href="https://console.volcengine.com/ark" target="_blank">火山引擎方舟</a>）</label>
+          <input type="password" id="cfgDoubaoKey" placeholder="在方舟控制台申请 API Key" />
+        </div>
+        <div class="form-row">
+          <label>模型 endpoint_id 或模型名（默认）</label>
+          <input type="text" id="cfgDoubaoModel" value="doubao-lite-4k" />
+        </div>
+        <div class="cfg-status" id="cfgDoubaoStatus">未验证</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">③ 旷视 Face++（人脸检测 + 五官点位）</div>
+        <div class="form-row">
+          <label>API Key（获取：<a href="https://console.faceplusplus.com.cn/" target="_blank">console.faceplusplus.com.cn</a>）</label>
+          <input type="password" id="cfgFaceKey" placeholder="Face++ API Key" />
+        </div>
+        <div class="form-row">
+          <label>API Secret</label>
+          <input type="password" id="cfgFaceSecret" placeholder="Face++ API Secret" />
+        </div>
+        <div class="form-row">
+          <label>接入区域（默认中国区）</label>
+          <select id="cfgFaceRegion">
+            <option value="api-cn.faceplusplus.com">中国区 api-cn.faceplusplus.com</option>
+            <option value="api-us.faceplusplus.com">国际区 api-us.faceplusplus.com</option>
+          </select>
+        </div>
+        <div class="cfg-status" id="cfgFaceStatus">未验证</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">操作</div>
+        <div class="row-btns">
+          <button class="btn btn-primary" id="cfgSave">保存配置</button>
+          <button class="btn btn-outline" id="cfgTest">一键测试全部 API</button>
+          <button class="btn btn-outline" id="cfgClear">清空本地密钥</button>
+        </div>
+        <div class="cfg-hint" id="cfgHint"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">说明 · 不配置也能运行</div>
+        <ul style="font-size:13px;color:#6c7280;line-height:1.8;padding-left:18px;margin:0">
+          <li>未配置 API Key 时，应用自动回落到 <b>本地 mock 智能响应</b>，仍可完整体验流程；</li>
+          <li>接入真实 API 后，报告/客服/素材内容由 <b>大模型真实生成</b>，不再是模板；</li>
+          <li>密钥仅保存在 <b>本浏览器 localStorage</b>，不上传到任何第三方服务器（除了 API 提供方）；</li>
+          <li>Face++ 因 API 限制，在浏览器直连时可能触发 CORS，此时会自动回落到本地 mock（不影响使用）；</li>
+          <li>推荐 <b>手机浏览器</b> 打开本页面体验移动端适配。</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- AI 客服聊天浮窗 -->
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div class="chat-title">
+        <div>🤖 南崽 AI 客服</div>
+        <small id="chatEngine">豆包 Lite · 24h 在线</small>
+      </div>
+      <button class="chat-close" id="chatClose">×</button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-quick" id="chatQuick">
+      <button data-q="形象诊断">想做形象诊断</button>
+      <button data-q="合伙人副业">想了解合伙人</button>
+      <button data-q="商K城市">商K城市推荐</button>
+      <button data-q="妆造学习">想学妆造</button>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="跟 AI 客服聊聊你的困惑…" />
+      <button id="chatSend">发送</button>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <small>本地演示版 · 数据仅保存于浏览器 · 不构成医疗建议</small>
+  </footer>
+
+  <button class="chat-fab-btn" id="chatFab" title="AI客服">
+    <span>💗</span><small>AI客服</small>
+  </button>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
