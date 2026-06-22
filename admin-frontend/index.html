@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>南崽形象美学 - 管理总后台</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; background: #f5f6f8; }
+    
+    /* 顶部导航 */
+    .header { background: #fff; padding: 16px 24px; box-shadow: 0 2px 8px rgba(0,0,0,.08); display: flex; justify-content: space-between; align-items: center; }
+    .header-title { font-size: 20px; font-weight: 600; color: #c26681; }
+    .header-user { font-size: 14px; color: #6c7280; }
+    
+    /* 侧边栏 */
+    .sidebar { position: fixed; left: 0; top: 60px; width: 220px; height: calc(100vh - 60px); background: #fff; border-right: 1px solid #e8eaee; padding: 16px; }
+    .menu-item { padding: 12px 16px; margin: 4px 0; border-radius: 8px; cursor: pointer; color: #6c7280; transition: .2s; }
+    .menu-item:hover { background: #fde8ec; color: #c26681; }
+    .menu-item.active { background: linear-gradient(135deg, #f7cdd5, #e9a7b4); color: #fff; }
+    
+    /* 主内容区 */
+    .main { margin-left: 220px; padding: 24px; min-height: calc(100vh - 60px); }
+    
+    /* 卡片 */
+    .card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .card-title { font-size: 16px; font-weight: 600; color: #3a3f4a; margin-bottom: 16px; }
+    
+    /* 统计卡片 */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .stat-card { background: linear-gradient(135deg, #fff7f9, #fff); border-radius: 12px; padding: 16px; border: 1px solid #fde8ec; }
+    .stat-num { font-size: 28px; font-weight: 700; color: #c26681; }
+    .stat-label { font-size: 12px; color: #6c7280; margin-top: 4px; }
+    
+    /* 表格 */
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #e8eaee; }
+    .table th { color: #6c7280; font-weight: 500; font-size: 12px; }
+    .table td { font-size: 14px; }
+    
+    /* 按钮 */
+    .btn { padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; border: 0; transition: .2s; }
+    .btn-primary { background: linear-gradient(135deg, #e9a7b4, #c26681); color: #fff; }
+    .btn-outline { background: #fff; border: 1px solid #c26681; color: #c26681; }
+    .btn-small { padding: 4px 12px; font-size: 12px; }
+    
+    /* 表单 */
+    .form-row { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 12px; color: #6c7280; margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 12px; border: 1px solid #e8eaee; border-radius: 8px; font-size: 14px; }
+    .form-input:focus { border-color: #c26681; outline: none; }
+    
+    /* 状态标签 */
+    .status-tag { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+    .status-active { background: #e6f4ea; color: #1e8e3e; }
+    .status-unsold { background: #fff7e0; color: #f09300; }
+    .status-banned { background: #fce8e6; color: #d93025; }
+    
+    /* 登录页面 */
+    .login-page { display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #fff7f9, #f5f6f8); }
+    .login-card { background: #fff; border-radius: 20px; padding: 40px; width: 360px; box-shadow: 0 8px 24px rgba(194,102,129,.15); }
+    .login-title { font-size: 24px; font-weight: 700; color: #c26681; text-align: center; margin-bottom: 24px; }
+    
+    /* API配置项 */
+    .api-config-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #e8eaee; }
+    .api-provider-name { font-weight: 600; color: #3a3f4a; }
+    .api-status { font-size: 12px; color: #6c7280; }
+    
+    /* 隐藏内容区（登录前） */
+    .content-area { display: none; }
+    .content-area.active { display: block; }
+    
+    /* 面板切换 */
+    .panel { display: none; }
+    .panel.active { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- 登录页面 -->
+<div class="login-page" id="loginPage">
+  <div class="login-card">
+    <div class="login-title">南崽管理后台</div>
+    <div class="form-row">
+      <label class="form-label">管理员账号</label>
+      <input type="text" class="form-input" id="loginUsername" placeholder="请输入账号">
+    </div>
+    <div class="form-row">
+      <label class="form-label">密码</label>
+      <input type="password" class="form-input" id="loginPassword" placeholder="请输入密码">
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="handleLogin()">登录</button>
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:#a8acb5">默认账号: admin / admin123</div>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div class="content-area" id="contentArea">
+  
+  <!-- 顶部导航 -->
+  <header class="header">
+    <div class="header-title">南崽形象美学 · 管理总后台</div>
+    <div class="header-user">
+      <span id="adminName">管理员</span>
+      <button class="btn btn-outline btn-small" onclick="handleLogout()">退出</button>
+    </div>
+  </header>
+  
+  <!-- 侧边栏 -->
+  <nav class="sidebar">
+    <div class="menu-item active" onclick="switchPanel('overview')">📊 数据概览</div>
+    <div class="menu-item" onclick="switchPanel('api')">⚙️ API管控</div>
+    <div class="menu-item" onclick="switchPanel('card')">🎫 卡密管理</div>
+    <div class="menu-item" onclick="switchPanel('user')">👥 用户管理</div>
+    <div class="menu-item" onclick="switchPanel('partner')">💰 分销合伙人</div>
+    <div class="menu-item" onclick="switchPanel('forbidden')">🚫 风控关键词</div>
+  </nav>
+  
+  <!-- 主内容区 -->
+  <main class="main">
+    
+    <!-- 数据概览面板 -->
+    <div class="panel active" id="panel-overview">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="statTodayUsers">-</div>
+          <div class="stat-label">今日新增用户</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statActiveUsers">-</div>
+          <div class="stat-label">今日活跃用户</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statTodayReports">-</div>
+          <div class="stat-label">今日生成报告</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statSoldCards">-</div>
+          <div class="stat-label">今日售出卡密</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">API调用统计（今日）</div>
+        <table class="table">
+          <thead>
+            <tr><th>API提供商</th><th>调用次数</th><th>消耗Token</th><th>错误次数</th></tr>
+          </thead>
+          <tbody id="apiStatsBody"></tbody>
+        </table>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">总数据统计</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <div style="text-align:center">
+            <div style="font-size:24px;font-weight:700;color:#c26681" id="statTotalUsers">-</div>
+            <div style="font-size:12px;color:#6c7280">总用户数</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:24px;font-weight:700;color:#c26681" id="statTotalCards">-</div>
+            <div style="font-size:12px;color:#6c7280">总卡密数</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:24px;font-weight:700;color:#c26681" id="statActiveCards">-</div>
+            <div style="font-size:12px;color:#6c7280">激活卡密</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:24px;font-weight:700;color:#c26681" id="statTotalPartners">-</div>
+            <div style="font-size:12px;color:#6c7280">合伙人总数</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- API管控面板 -->
+    <div class="panel" id="panel-api">
+      <div class="card">
+        <div class="card-title">三大API接口配置</div>
+        <div id="apiConfigList"></div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">API调用日志</div>
+        <div style="margin-bottom:12px">
+          <select class="form-input" style="width:200px" id="apiLogProvider">
+            <option value="">全部</option>
+            <option value="facepp">Face++</option>
+            <option value="zhipu">智谱</option>
+            <option value="doubao">豆包</option>
+          </select>
+          <button class="btn btn-primary btn-small" onclick="loadApiLogs()">查询</button>
+        </div>
+        <table class="table">
+          <thead>
+            <tr><th>时间</th><th>API</th><th>类型</th><th>用户ID</th><th>状态</th><th>耗时(ms)</th></tr>
+          </thead>
+          <tbody id="apiLogsBody"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- 卡密管理面板 -->
+    <div class="panel" id="panel-card">
+      <div class="card">
+        <div class="card-title">批量生成卡密</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div class="form-row">
+            <label class="form-label">生成数量</label>
+            <input type="number" class="form-input" id="cardCount" value="10" min="1" max="1000">
+          </div>
+          <div class="form-row">
+            <label class="form-label">有效期（天）</label>
+            <input type="number" class="form-input" id="cardDays" value="30">
+          </div>
+          <div class="form-row">
+            <label class="form-label">价格（元）</label>
+            <input type="number" class="form-input" id="cardPrice" value="99">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="generateCards()">批量生成</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">卡密列表</div>
+        <div style="margin-bottom:12px">
+          <select class="form-input" style="width:200px" id="cardStatusFilter">
+            <option value="">全部状态</option>
+            <option value="unsold">未售出</option>
+            <option value="active">已激活</option>
+            <option value="expired">已过期</option>
+            <option value="banned">已封禁</option>
+          </select>
+          <button class="btn btn-outline btn-small" onclick="exportCards()">导出CSV</button>
+        </div>
+        <table class="table">
+          <thead>
+            <tr><th>卡密编号</th><th>类型</th><th>天数</th><th>价格</th><th>状态</th><th>创建时间</th><th>操作</th></tr>
+          </thead>
+          <tbody id="cardListBody"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- 用户管理面板 -->
+    <div class="panel" id="panel-user">
+      <div class="card">
+        <div class="card-title">用户列表</div>
+        <table class="table">
+          <thead>
+            <tr><th>ID</th><th>手机号</th><th>昵称</th><th>卡密</th><th>到期时间</th><th>总报告数</th><th>状态</th><th>操作</th></tr>
+          </thead>
+          <tbody id="userListBody"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- 分销合伙人面板 -->
+    <div class="panel" id="panel-partner">
+      <div class="card">
+        <div class="card-title">创建合伙人</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div class="form-row">
+            <label class="form-label">合伙人名称</label>
+            <input type="text" class="form-input" id="partnerName" placeholder="如：小南">
+          </div>
+          <div class="form-row">
+            <label class="form-label">等级</label>
+            <select class="form-input" id="partnerLevel">
+              <option value="silver">白银（10%）</option>
+              <option value="gold">黄金（15%）</option>
+              <option value="platinum">铂金（20%）</option>
+              <option value="diamond">钻石（25%）</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">佣金比例</label>
+            <input type="number" class="form-input" id="partnerCommission" value="10">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="createPartner()">创建合伙人</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">合伙人列表</div>
+        <table class="table">
+          <thead>
+            <tr><th>编号</th><th>名称</th><th>等级</th><th>佣金比例</th><th>总销售额</th><th>总佣金</th><th>状态</th></tr>
+          </thead>
+          <tbody id="partnerListBody"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- 风控关键词面板 -->
+    <div class="panel" id="panel-forbidden">
+      <div class="card">
+        <div class="card-title">添加违规关键词</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-row">
+            <label class="form-label">关键词</label>
+            <input type="text" class="form-input" id="forbiddenKeyword" placeholder="输入要过滤的词">
+          </div>
+          <div class="form-row">
+            <label class="form-label">类别</label>
+            <select class="form-input" id="forbiddenCategory">
+              <option value="medical">医美夸大</option>
+              <option value="vulgar">低俗内容</option>
+              <option value="general">通用违规</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addForbidden()">添加关键词</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">关键词列表</div>
+        <table class="table">
+          <thead>
+            <tr><th>关键词</th><th>类别</th><th>严重程度</th><th>添加时间</th><th>操作</th></tr>
+          </thead>
+          <tbody id="forbiddenListBody"></tbody>
+        </table>
+      </div>
+    </div>
+    
+  </main>
+</div>
+
+<script>
+  const API_BASE = 'http://localhost:3002/admin';
+  let authToken = '';
+  
+  // 登录
+  async function handleLogin() {
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!username || !password) {
+      alert('请输入账号和密码');
+      return;
+    }
+    
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        authToken = data.token;
+        document.getElementById('adminName').textContent = data.admin.username;
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('contentArea').classList.add('active');
+        loadOverview();
+      } else {
+        alert(data.error || '登录失败');
+      }
+    } catch (e) {
+      alert('网络错误，请检查后台服务是否启动');
+    }
+  }
+  
+  // 退出登录
+  function handleLogout() {
+    authToken = '';
+    document.getElementById('loginPage').style.display = 'flex';
+    document.getElementById('contentArea').classList.remove('active');
+  }
+  
+  // 切换面板
+  function switchPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    event.target.classList.add('active');
+    
+    // 加载对应数据
+    if (name === 'overview') loadOverview();
+    if (name === 'api') loadApiConfig();
+    if (name === 'card') loadCardList();
+    if (name === 'user') loadUserList();
+    if (name === 'partner') loadPartnerList();
+    if (name === 'forbidden') loadForbiddenList();
+  }
+  
+  // 加载概览数据
+  async function loadOverview() {
+    try {
+      const res = await fetch(`${API_BASE}/stats/overview`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        document.getElementById('statTodayUsers').textContent = data.today.newUsers;
+        document.getElementById('statActiveUsers').textContent = data.today.activeUsers;
+        document.getElementById('statTodayReports').textContent = data.today.newReports;
+        document.getElementById('statSoldCards').textContent = data.today.soldCards;
+        
+        document.getElementById('statTotalUsers').textContent = data.total.users;
+        document.getElementById('statTotalCards').textContent = data.total.cards;
+        document.getElementById('statActiveCards').textContent = data.total.activeCards;
+        document.getElementById('statTotalPartners').textContent = data.total.partners;
+        
+        // API统计表格
+        const tbody = document.getElementById('apiStatsBody');
+        tbody.innerHTML = data.apiStats.map(s => `
+          <tr>
+            <td>${s.api_provider}</td>
+            <td>${s.total_calls}</td>
+            <td>${s.total_tokens || '-'}</td>
+            <td>${s.error_count}</td>
+          </tr>
+        `).join('');
+      }
+    } catch (e) {
+      console.error('加载概览失败:', e);
+    }
+  }
+  
+  // 加载API配置
+  async function loadApiConfig() {
+    try {
+      const res = await fetch(`${API_BASE}/api-config`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        const list = document.getElementById('apiConfigList');
+        list.innerHTML = data.configs.map(c => `
+          <div class="api-config-item">
+            <div>
+              <div class="api-provider-name">${c.api_provider}</div>
+              <div class="api-status">今日已用: ${c.used_today || 0} / ${c.daily_limit || 1000}</div>
+            </div>
+            <div>
+              <span class="status-tag ${c.is_enabled ? 'status-active' : 'status-banned'}">${c.is_enabled ? '已启用' : '已关闭'}</span>
+              <button class="btn btn-outline btn-small" onclick="toggleApi('${c.api_provider}', ${c.is_enabled})">切换</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    } catch (e) {
+      console.error('加载API配置失败:', e);
+    }
+  }
+  
+  // 切换API状态
+  async function toggleApi(provider, currentEnabled) {
+    try {
+      await fetch(`${API_BASE}/api-config/${provider}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_enabled: !currentEnabled })
+      });
+      loadApiConfig();
+    } catch (e) {
+      alert('操作失败');
+    }
+  }
+  
+  // 加载API日志
+  async function loadApiLogs() {
+    const provider = document.getElementById('apiLogProvider').value;
+    try {
+      const res = await fetch(`${API_BASE}/api-config/logs?provider=${provider}&limit=50`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        const tbody = document.getElementById('apiLogsBody');
+        tbody.innerHTML = data.logs.map(l => `
+          <tr>
+            <td>${l.created_at}</td>
+            <td>${l.api_provider}</td>
+            <td>${l.request_type}</td>
+            <td>${l.user_id || '-'}</td>
+            <td><span class="status-tag ${l.status === 'success' ? 'status-active' : 'status-banned'}">${l.status}</span></td>
+            <td>${l.response_time_ms || '-'}</td>
+          </tr>
+        `).join('');
+      }
+    } catch (e) {
+      console.error('加载日志失败:', e);
+    }
+  }
+  
+  // 批量生成卡密
+  async function generateCards() {
+    const count = document.getElementById('cardCount').value;
+    const days = document.getElementById('cardDays').value;
+    const price = document.getElementById('cardPrice').value;
+    
+    try {
+      const res = await fetch(`${API_BASE}/card-keys/generate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ count: parseInt(count), duration_days: parseInt(days), price: parseFloat(price) })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        alert(data.message);
+        loadCardList();
+      } else {
+        alert(data.error);
+      }
+    } catch (e) {
+      alert('生成失败');
+    }
+  }
+  
+  // 加载卡密列表
+  async function loadCardList() {
+    const status = document.getElementById('cardStatusFilter').value;
+    try {
+      const res = await fetch(`${API_BASE}/card-keys?status=${status}&limit=50`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        const tbody = document.getElementById('cardListBody');
+        tbody.innerHTML = data.cards.map(c => `
+          <tr>
+            <td>${c.card_code}</td>
+            <td>${c.card_type}</td>
+            <td>${c.duration_days}天</td>
+            <td>¥${c.price}</td>
+            <td><span class="status-tag status-${c.status}">${c.status}</span></td>
+            <td>${c.created_at}</td>
+            <td>
+              ${c.status !== 'banned' ? `<button class="btn btn-outline btn-small" onclick="banCard('${c.card_code}')">封禁</button>` : ''}
+            </td>
+          </tr>
+        `).join('');
+      }
+    } catch (e) {
+      console.error('加载卡密失败:', e);
+    }
+  }
+  
+  // 封禁卡密
+  async function banCard(code) {
+    if (!confirm('确认封禁该卡密？')) return;
+    
+    try {
+      await fetch(`${API_BASE}/card-keys/ban/${code}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      loadCardList();
+    } catch (e) {
+      alert('操作失败');
+    }
+  }
+  
+  // 导出卡密
+  function exportCards() {
+    window.open(`${API_BASE}/card-keys/export?token=${authToken}`);
+  }
+  
+  // 加载用户列表
+  async function loadUserList() {
+    try {
+      const res = await fetch(`${API_BASE}/users?limit=50`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        const tbody = document.getElementById('userListBody');
+        tbody.innerHTML = data.users.map(u => `
+          <tr>
+            <td>${u.id}</td>
+            <td>${u.phone || '-'}</td>
+            <td>${u.nickname || '-'}</td>
+            <td>${u.card_key || '-'}</td>
+            <td>${u.card_expire_time || '-'}</td>
+            <td>${u.total_reports}</td>
+            <td><span class="status-tag status-${u.status}">${u.status}</span></td>
+            <td>
+              ${u.status !== 'banned' ? `<button class="btn btn-outline btn-small" onclick="banUser(${u.id})">封禁</button>` : ''}
+            </td>
+          </tr>
+        `).join('');
+      }
+    } catch (e) {
+      console.error('加载用户失败:', e);
+    }
+  }
+  
+  // 封禁用户
+  async function banUser(id) {
+    if (!confirm('确认封禁该用户？')) return;
+    
+    try {
+      await fetch(`${API_BASE}/users/ban/${id}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      loadUserList();
+    } catch (e) {
+      alert('操作失败');
+    }
+  }
+  
+  // 创建合伙人
+  async function createPartner() {
+    const name = document.getElementById('partnerName').value;
+    const level = document.getElementById('partnerLevel').value;
+    const commission = document.getElementById('partnerCommission').value;
+    
+    if (!name) {
+      alert('请输入合伙人名称');
+      return;
+    }
+    
+    try {
+      const res = await fetch(`${API_BASE}/partners`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, level, commission_rate: parseFloat(commission) })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        alert(`合伙人已创建，编号: ${data.partnerCode}`);
+        loadPartnerList();
+      } else {
+        alert(data.error);
+      }
+    } catch (e) {
+      alert('创建失败');
+    }
+  }
+  
+  // 加载合伙人列表
+  async function loadPartnerList() {
+    try {
+      const res = await fetch(`${API_BASE}/partners`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        const tbody = document.getElementById('partnerListBody');
+        tbody.innerHTML = data.partners.map(p => `
+          <tr>
+            <td>${p.partner_code}</td>
+            <td>${p.partner_name}</td>
+            <td>${p.partner_level}</td>
+            <td>${p.commission_rate}%</td>
+            <td>${p.total_sales}</td>
+            <td>¥${p.total_commission}</td>
+            <td><span class="status-tag status-${p.status}">${p.status}</span></td>
+          </tr>
+        `).join('');
+      }
+    } catch (e) {
+      console.error('加载合伙人失败:', e);
+    }
+  }
+  
+  // 添加违规关键词
+  async function addForbidden() {
+    const keyword = document.getElementById('forbiddenKeyword').value;
+    const category = document.getElementById('forbiddenCategory').value;
+    
+    if (!keyword) {
+      alert('请输入关键词');
+      return;
+    }
+    
+    try {
+      await fetch(`${API_BASE}/forbidden`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ keyword, category })
+      });
+      document.getElementById('forbiddenKeyword').value = '';
+      loadForbiddenList();
+    } catch (e) {
+      alert('添加失败');
+    }
+  }
+  
+  // 加载关键词列表
+  async function loadForbiddenList() {
+    try {
+      const res = await fetch(`${API_BASE}/forbidden`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        const tbody = document.getElementById('forbiddenListBody');
+        tbody.innerHTML = data.keywords.map(k => `
+          <tr>
+            <td>${k.keyword}</td>
+            <td>${k.category}</td>
+            <td>${k.severity}</td>
+            <td>${k.created_at}</td>
+            <td><button class="btn btn-outline btn-small" onclick="deleteForbidden(${k.id})">删除</button></td>
+          </tr>
+        `).join('');
+      }
+    } catch (e) {
+      console.error('加载关键词失败:', e);
+    }
+  }
+  
+  // 删除关键词
+  async function deleteForbidden(id) {
+    try {
+      await fetch(`${API_BASE}/forbidden/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+      loadForbiddenList();
+    } catch (e) {
+      alert('删除失败');
+    }
+  }
+</script>
+
+</body>
+</html>
